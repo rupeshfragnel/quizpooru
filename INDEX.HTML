@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Technology Quiz</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f7f9fc;
+            color: #333;
+        }
+        .quiz-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .question-container {
+            margin-bottom: 25px;
+            display: none;
+        }
+        .question {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
+            background-color: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .option:hover {
+            background-color: #e2e8f0;
+        }
+        .option.selected {
+            background-color: #bae6fd;
+            border-color: #7dd3fc;
+        }
+        .option.correct {
+            background-color: #bbf7d0;
+            border-color: #86efac;
+        }
+        .option.incorrect {
+            background-color: #fecaca;
+            border-color: #fca5a5;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        button:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .feedback {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: none;
+        }
+        .feedback.correct {
+            background-color: #ecfdf5;
+            color: #065f46;
+        }
+        .feedback.incorrect {
+            background-color: #fef2f2;
+            color: #b91c1c;
+        }
+        .progress {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            flex-grow: 1;
+            margin: 0 10px;
+            height: 10px;
+            background-color: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .results {
+            text-align: center;
+            display: none;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .message {
+            margin-bottom: 20px;
+        }
+        .restart {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <h1>Web Technology Quiz</h1>
+        
+        <div class="progress">
+            <span id="question-number">Question 1/10</span>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span id="score">Score: 0</span>
+        </div>
+        
+        <div id="quiz-content">
+            <!-- Questions will be inserted here -->
+        </div>
+        
+        <div class="feedback" id="feedback"></div>
+        
+        <div class="controls">
+            <button id="prev-btn" disabled>Previous</button>
+            <button id="next-btn">Next</button>
+        </div>
+        
+        <div class="results" id="results">
+            <h2>Quiz Completed!</h2>
+            <div class="score" id="final-score">Your score: 0/10</div>
+            <div class="message" id="result-message"></div>
+            <button class="restart" id="restart-btn">Restart Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What does HTML stand for?",
+                options: [
+                    "Hyper Text Markup Language",
+                    "High Tech Modern Language",
+                    "Hyperlink and Text Markup Language",
+                    "Home Tool Markup Language"
+                ],
+                correct: 0,
+                explanation: "HTML stands for Hyper Text Markup Language. It is the standard markup language for creating web pages."
+            },
+            {
+                question: "Which CSS property is used to control the space between elements?",
+                options: [
+                    "spacing",
+                    "margin",
+                    "padding",
+                    "gap"
+                ],
+                correct: 1,
+                explanation: "The margin property in CSS defines the space outside of an element's border, between adjacent elements."
+            },
+            {
+                question: "What is the purpose of JavaScript's 'addEventListener' method?",
+                options: [
+                    "To add CSS styles dynamically",
+                    "To register event handlers on HTML elements",
+                    "To create new HTML elements",
+                    "To load external JavaScript files"
+                ],
+                correct: 1,
+                explanation: "The addEventListener method attaches an event handler function to an element, allowing you to respond to user actions like clicks or keyboard input."
+            },
+            {
+                question: "Which HTTP status code indicates a successful response?",
+                options: [
+                    "404",
+                    "500",
+                    "200",
+                    "301"
+                ],
+                correct: 2,
+                explanation: "HTTP status code 200 (OK) indicates that the request was successful and the server returned the requested content."
+            },
+            {
+                question: "What is the purpose of the localStorage API in web development?",
+                options: [
+                    "To store session cookies",
+                    "To store data persistently in the browser",
+                    "To cache server responses",
+                    "To improve website performance"
+                ],
+                correct: 1,
+                explanation: "localStorage allows web applications to store data locally in a user's browser with no expiration time, even after the browser is closed and reopened."
+            },
+            {
+                question: "Which of the following is a JavaScript framework?",
+                options: [
+                    "Python",
+                    "Django",
+                    "Ruby",
+                    "React"
+                ],
+                correct: 3,
+                explanation: "React is a popular JavaScript library/framework for building user interfaces, developed by Facebook."
+            },
+            {
+                question: "What does API stand for?",
+                options: [
+                    "Application Programming Interface",
+                    "Advanced Programming Integration",
+                    "Automated Program Interface",
+                    "Application Process Integration"
+                ],
+                correct: 0,
+                explanation: "API stands for Application Programming Interface. It defines interactions between multiple software applications or mixed hardware-software intermediaries."
+            },
+            {
+                question: "What is the primary purpose of CSS?",
+                options: [
+                    "To create interactive web pages",
+                    "To structure content on web pages",
+                    "To style and layout web pages",
+                    "To handle server requests"
+                ],
+                correct: 2,
+                explanation: "CSS (Cascading Style Sheets) is used to style and layout web pages — controlling the design, layout, and display variations across different devices and screen sizes."
+            },
+            {
+                question: "Which of these is NOT a valid HTTP request method?",
+                options: [
+                    "GET",
+                    "POST",
+                    "PULL",
+                    "DELETE"
+                ],
+                correct: 2,
+                explanation: "PULL is not a standard HTTP request method. The standard methods include GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS, and CONNECT."
+            },
+            {
+                question: "What technology is used to make API requests from the browser without reloading the page?",
+                options: [
+                    "HTML5",
+                    "CSS3",
+                    "AJAX",
+                    "WebSocket"
+                ],
+                correct: 2,
+                explanation: "AJAX (Asynchronous JavaScript and XML) allows web applications to make asynchronous HTTP requests to the server without reloading the page."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answered = new Array(quizData.length).fill(false);
+        let selectedOptions = new Array(quizData.length).fill(null);
+
+        const quizContent = document.getElementById('quiz-content');
+        const feedbackDiv = document.getElementById('feedback');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const questionNumber = document.getElementById('question-number');
+        const scoreDisplay = document.getElementById('score');
+        const progressFill = document.getElementById('progress-fill');
+        const resultsDiv = document.getElementById('results');
+        const finalScore = document.getElementById('final-score');
+        const resultMessage = document.getElementById('result-message');
+        const restartBtn = document.getElementById('restart-btn');
+
+        function createQuestions() {
+            quizData.forEach((questionData, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'question-container';
+                questionDiv.id = `question-${index}`;
+                
+                questionDiv.innerHTML = `
+                    <div class="question">${index + 1}. ${questionData.question}</div>
+                    <div class="options">
+                        ${questionData.options.map((option, i) => `
+                            <div class="option" data-index="${i}">${option}</div>
+                        `).join('')}
+                    </div>
+                `;
+                
+                quizContent.appendChild(questionDiv);
+                
+                // Add event listeners to each option
+                const options = questionDiv.querySelectorAll('.option');
+                options.forEach(option => {
+                    option.addEventListener('click', () => selectOption(option, index));
+                });
+            });
+            
+            // Show first question
+            document.getElementById(`question-${currentQuestion}`).style.display = 'block';
+        }
+
+        function selectOption(option, questionIndex) {
+            if (answered[questionIndex]) return;
+            
+            const options = document.querySelectorAll(`#question-${questionIndex} .option`);
+            options.forEach(opt => opt.classList.remove('selected'));
+            option.classList.add('selected');
+            
+            const selectedIndex = parseInt(option.getAttribute('data-index'));
+            selectedOptions[questionIndex] = selectedIndex;
+            
+            checkAnswer(questionIndex, selectedIndex);
+        }
+
+        function checkAnswer(questionIndex, selectedIndex) {
+            if (answered[questionIndex]) return;
+            
+            const correctIndex = quizData[questionIndex].correct;
+            const options = document.querySelectorAll(`#question-${questionIndex} .option`);
+            
+            if (selectedIndex === correctIndex) {
+                options[selectedIndex].classList.add('correct');
+                feedbackDiv.textContent = "Correct! " + quizData[questionIndex].explanation;
+                feedbackDiv.className = "feedback correct";
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+            } else {
+                options[selectedIndex].classList.add('incorrect');
+                options[correctIndex].classList.add('correct');
+                feedbackDiv.textContent = "Incorrect! " + quizData[questionIndex].explanation;
+                feedbackDiv.className = "feedback incorrect";
+            }
+            
+            feedbackDiv.style.display = 'block';
+            answered[questionIndex] = true;
+        }
+
+        function navigateQuestion(direction) {
+            document.getElementById(`question-${currentQuestion}`).style.display = 'none';
+            feedbackDiv.style.display = 'none';
+            
+            currentQuestion += direction;
+            
+            document.getElementById(`question-${currentQuestion}`).style.display = 'block';
+            questionNumber.textContent = `Question ${currentQuestion + 1}/${quizData.length}`;
+            
+            // Update progress bar
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            progressFill.style.width = `${progress}%`;
+            
+            // Update button states
+            prevBtn.disabled = currentQuestion === 0;
+            
+            if (currentQuestion === quizData.length - 1) {
+                nextBtn.textContent = 'Finish';
+            } else {
+                nextBtn.textContent = 'Next';
+            }
+            
+            // Show feedback if question was already answered
+            if (answered[currentQuestion]) {
+                const selectedIndex = selectedOptions[currentQuestion];
+                const correctIndex = quizData[currentQuestion].correct;
+                
+                if (selectedIndex === correctIndex) {
+                    feedbackDiv.textContent = "Correct! " + quizData[currentQuestion].explanation;
+                    feedbackDiv.className = "feedback correct";
+                } else {
+                    feedbackDiv.textContent = "Incorrect! " + quizData[currentQuestion].explanation;
+                    feedbackDiv.className = "feedback incorrect";
+                }
+                
+                feedbackDiv.style.display = 'block';
+            }
+        }
+
+        function showResults() {
+            document.getElementById(`question-${currentQuestion}`).style.display = 'none';
+            feedbackDiv.style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            document.querySelector('.progress').style.display = 'none';
+            
+            resultsDiv.style.display = 'block';
+            finalScore.textContent = `Your score: ${score}/${quizData.length}`;
+            
+            const percentage = (score / quizData.length) * 100;
+            
+            if (percentage >= 90) {
+                resultMessage.textContent = "Excellent! You're a web technology expert!";
+            } else if (percentage >= 70) {
+                resultMessage.textContent = "Great job! You have a solid understanding of web technologies.";
+            } else if (percentage >= 50) {
+                resultMessage.textContent = "Good effort! You have basic knowledge of web technologies.";
+            } else {
+                resultMessage.textContent = "Keep learning! Web technologies can be complex, but you'll get there.";
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answered = new Array(quizData.length).fill(false);
+            selectedOptions = new Array(quizData.length).fill(null);
+            
+            // Reset UI
+            scoreDisplay.textContent = "Score: 0";
+            questionNumber.textContent = `Question 1/${quizData.length}`;
+            progressFill.style.width = `${100 / quizData.length}%`;
+            prevBtn.disabled = true;
+            nextBtn.textContent = 'Next';
+            
+            // Hide results and show controls
+            resultsDiv.style.display = 'none';
+            document.querySelector('.controls').style.display = 'flex';
+            document.querySelector('.progress').style.display = 'flex';
+            
+            // Reset all questions and options
+            quizData.forEach((_, index) => {
+                document.getElementById(`question-${index}`).style.display = 'none';
+                
+                const options = document.querySelectorAll(`#question-${index} .option`);
+                options.forEach(option => {
+                    option.classList.remove('selected', 'correct', 'incorrect');
+                });
+            });
+            
+            // Show first question
+            document.getElementById('question-0').style.display = 'block';
+            feedbackDiv.style.display = 'none';
+        }
+
+        // Initialize the quiz
+        createQuestions();
+
+        // Event listeners
+        prevBtn.addEventListener('click', () => navigateQuestion(-1));
+        
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion === quizData.length - 1) {
+                showResults();
+            } else {
+                navigateQuestion(1);
+            }
+        });
+        
+        restartBtn.addEventListener('click', restartQuiz);
+    </script>
+</body>
+</html>
